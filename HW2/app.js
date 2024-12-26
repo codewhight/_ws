@@ -1,10 +1,12 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import * as render from './render.js'
 
-const posts = {
-    josh:[{id:0, title:'ccc1', body:'ccc1', created_at:new Date()}],
-    snoopy:[]
-  };
+const open = new Date().toLocaleString();
+
+const posts = [
+  {id:0, title:'text1', body:'This post is for testing.', time: open},
+  {id:1, title:'test2', body:'測試', time: open}
+];
 
 const router = new Router();
 
@@ -12,6 +14,7 @@ router.get('/', list)
   .get('/post/new', add)
   .get('/post/:id', show)
   .post('/post', create);
+
 
 const app = new Application();
 app.use(router.routes());
@@ -33,9 +36,9 @@ async function show(ctx) {
 }
 
 async function create(ctx) {
-  const body = ctx.request.body()
-  if (body.type === "form") {
-    const pairs = await body.value
+  const body = ctx.request.body
+  if (body.type() === "form") {
+    const pairs = await body.form()  // body.value
     const post = {}
     for (const [key, value] of pairs) {
       post[key] = value
@@ -43,6 +46,7 @@ async function create(ctx) {
     console.log('post=', post)
     const id = posts.push(post) - 1;
     post.created_at = new Date();
+    post.time = post.created_at.toLocaleString();
     post.id = id;
     ctx.response.redirect('/');
   }
